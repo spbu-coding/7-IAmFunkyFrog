@@ -24,25 +24,35 @@ $(BUILD_DIR):
 
 $(RESULTS_DIR):
 	mkdir $@
-	touch $@/$(TMP_STDOUT_FILENAME)
 
 $(RESULTS_DIR)/%.txt: $(TEST_DIR)/%.in $(TEST_DIR)/%.out $(BUILD_DIR)/$(NAME)
-	@echo "$@ checking..."; \
-	$(BUILD_DIR)/$(NAME) $< > $(RESULTS_DIR)/$(TMP_STDOUT_FILENAME); \
+	@$(BUILD_DIR)/$(NAME) $< > $(RESULTS_DIR)/$(TMP_STDOUT_FILENAME); \
 	test_out_filename=$$( echo $< | sed 's/.in/.out/g'); \
 	program_out_filename=$(RESULTS_DIR)/$(TMP_STDOUT_FILENAME); \
 	cmp $$test_out_filename $$program_out_filename > $@; \
 	if [ $$? = 0 ]; \
-	then echo "$(TEST_SUCCESS_MESSAGE)" > $@; \
-	else exit 1; \
-	fi
+    	then \
+    	  echo $(TEST_SUCCESS_MESSAGE) > $@; \
+    	  exit 0; \
+    	else exit 1; \
+    fi
 
 check: $(RESULTS_DIR) all
-	$(shell \
-	echo "make"; \
+	@test_count=0; \
+	test_passed=0; \
 	for filename in $(TEST_FILENAMES); \
-	do echo " $(RESULTS_DIR)/$$filename.txt";\
-	done)
+	do \
+	  	test_count=$$(($$test_count + 1)); \
+		make --quiet $(RESULTS_DIR)/$$filename.txt;\
+		if [ $$? = 0 ]; \
+		then test_passed=$$(($$test_passed + 1)); \
+		fi; \
+		echo "Test $$filename:"; \
+		cat $(RESULTS_DIR)/$$filename.txt; \
+	done; \
+	if [ $$test_passed != $$test_count ]; \
+	then exit 1; \
+	fi; \
 
 clean:
 	rm -rf $(BUILD_DIR)/*
