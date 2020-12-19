@@ -45,5 +45,5 @@ check: $(RESULTS_DIR) all
 	done)
 
 clean:
-	rm -rf $(BUILD_DIR)/*.o
+	rm -rf $(BUILD_DIR)/*
 	rm -rf $(RESULTS_DIR)
