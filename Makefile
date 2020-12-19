@@ -11,6 +11,8 @@ TMP_STDOUT_FILENAME = stdout.buf
 
 TEST_SUCCESS_MESSAGE = TEST PASSED
 
+all: $(BUILD_DIR) $(BUILD_DIR)/$(NAME)
+
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c
 	$(CC) -c $< -o $@
 
@@ -34,8 +36,6 @@ $(RESULTS_DIR)/%.txt: $(TEST_DIR)/%.in $(TEST_DIR)/%.out $(BUILD_DIR)/$(NAME)
 	then echo "$(TEST_SUCCESS_MESSAGE)" > $@; \
 	else exit 1; \
 	fi
-
-all: $(BUILD_DIR) $(BUILD_DIR)/$(NAME)
 
 check: $(RESULTS_DIR) all
 	$(shell \
