@@ -31,26 +31,20 @@ $(RESULTS_DIR)/%.txt: $(TEST_DIR)/%.in $(TEST_DIR)/%.out $(BUILD_DIR)/$(NAME)
 	program_out_filename=$(RESULTS_DIR)/$(TMP_STDOUT_FILENAME); \
 	cmp $$test_out_filename $$program_out_filename > $@; \
 	if [ $$? = 0 ]; \
-    	then \
-    	  echo $(TEST_SUCCESS_MESSAGE) > $@; \
-    	  exit 0; \
-    	else exit 1; \
+    	then echo $(TEST_SUCCESS_MESSAGE) > $@; \
     fi
 
-check: $(RESULTS_DIR) all
-	@test_count=0; \
-	test_passed=0; \
+check: $(RESULTS_DIR) $(foreach test_name, $(TEST_FILENAMES), $(RESULTS_DIR)/$(test_name).txt) all
+	@test_failed=0; \
 	for filename in $(TEST_FILENAMES); \
 	do \
-	  	test_count=$$(($$test_count + 1)); \
-		make --quiet $(RESULTS_DIR)/$$filename.txt;\
-		if [ $$? = 0 ]; \
-		then test_passed=$$(($$test_passed + 1)); \
-		fi; \
 		echo "Test $$filename:"; \
 		cat $(RESULTS_DIR)/$$filename.txt; \
+		if [ "$$(cat $(RESULTS_DIR)/$${filename}.txt)" != "$(TEST_SUCCESS_MESSAGE)" ]; \
+		then test_failed=$$(($$test_failed + 1)); \
+		fi; \
 	done; \
-	if [ $$test_passed != $$test_count ]; \
+	if [ $$test_failed != 0 ]; \
 	then exit 1; \
 	fi; \
 
