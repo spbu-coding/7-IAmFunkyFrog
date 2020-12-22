@@ -11,12 +11,15 @@ TMP_STDOUT_FILENAME = stdout.buf
 
 TEST_SUCCESS_MESSAGE = TEST PASSED
 
+TARGET_DEPENDENCIES = $(foreach object_name, $(OBJECTS), $(BUILD_DIR)/$(object_name).o)
+RESULTS = $(foreach test_name, $(TEST_FILENAMES), $(RESULTS_DIR)/$(test_name).txt)
+
 all: $(BUILD_DIR) $(BUILD_DIR)/$(NAME)
 
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c
 	$(CC) -c $< -o $@
 
-$(BUILD_DIR)/$(NAME): $(foreach object_name, $(OBJECTS), $(BUILD_DIR)/$(object_name).o)
+$(BUILD_DIR)/$(NAME): $(TARGET_DEPENDENCIES)
 	$(CC) $^ -o $@
 
 $(BUILD_DIR):
@@ -34,7 +37,7 @@ $(RESULTS_DIR)/%.txt: $(TEST_DIR)/%.in $(TEST_DIR)/%.out $(BUILD_DIR)/$(NAME)
     	then echo $(TEST_SUCCESS_MESSAGE) > $@; \
     fi
 
-check: $(RESULTS_DIR) $(foreach test_name, $(TEST_FILENAMES), $(RESULTS_DIR)/$(test_name).txt) all
+check: $(RESULTS_DIR) $(RESULTS) all
 	@test_failed=0; \
 	for filename in $(TEST_FILENAMES); \
 	do \
