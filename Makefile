@@ -2,17 +2,16 @@ include CONFIG.cfg
 
 .PHONY: all, check, clean
 
-OBJECTS = sorter
+SOURCES = $(wildcard $(SOURCE_DIR)/*.c)
 
 RESULTS_DIR = results
-
-TEST_FILENAMES = 1 2 3 4 5 6 last
+TEST_FILENAMES = $(wildcard $(TEST_DIR)/*.in)
 TMP_STDOUT_FILENAME = stdout.buf
 
 TEST_SUCCESS_MESSAGE = TEST PASSED
 
-TARGET_DEPENDENCIES = $(foreach object_name, $(OBJECTS), $(BUILD_DIR)/$(object_name).o)
-RESULTS = $(foreach test_name, $(TEST_FILENAMES), $(RESULTS_DIR)/$(test_name).txt)
+TARGET_DEPENDENCIES = $(subst $(SOURCE_DIR), $(BUILD_DIR), $(SOURCES:.c=.o))
+RESULTS = $(subst $(TEST_DIR), $(RESULTS_DIR), $(TEST_FILENAMES:.in=.txt))
 
 all: $(BUILD_DIR) $(BUILD_DIR)/$(NAME)
 
@@ -39,11 +38,11 @@ $(RESULTS_DIR)/%.txt: $(TEST_DIR)/%.in $(TEST_DIR)/%.out $(BUILD_DIR)/$(NAME)
 
 check: $(RESULTS_DIR) $(RESULTS) all
 	@test_failed=0; \
-	for filename in $(TEST_FILENAMES); \
+	for filename in $(RESULTS); \
 	do \
 		echo "Test $$filename:"; \
-		cat $(RESULTS_DIR)/$$filename.txt; \
-		if [ "$$(cat $(RESULTS_DIR)/$${filename}.txt)" != "$(TEST_SUCCESS_MESSAGE)" ]; \
+		cat $$filename; \
+		if [ "$$(cat $$filename)" != "$(TEST_SUCCESS_MESSAGE)" ]; \
 		then test_failed=$$(($$test_failed + 1)); \
 		fi; \
 	done; \
