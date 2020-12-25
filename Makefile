@@ -28,9 +28,9 @@ $(RESULTS_DIR):
 	mkdir $@
 
 $(RESULTS_DIR)/%.txt: $(TEST_DIR)/%.in $(TEST_DIR)/%.out $(BUILD_DIR)/$(NAME)
-	@$(BUILD_DIR)/$(NAME) $< > $(RESULTS_DIR)/$(TMP_STDOUT_FILENAME); \
-	test_out_filename=$$( echo $< | sed 's/.in/.out/g'); \
-	program_out_filename=$(RESULTS_DIR)/$(TMP_STDOUT_FILENAME); \
+	@test_out_filename=$$( echo $< | sed 's/.in/.out/g'); \
+    program_out_filename=$(RESULTS_DIR)/$(TMP_STDOUT_FILENAME); \
+	$(BUILD_DIR)/$(NAME) $< > $$program_out_filename; \
 	cmp $$test_out_filename $$program_out_filename > $@; \
 	if [ $$? = 0 ]; \
     	then echo $(TEST_SUCCESS_MESSAGE) > $@; \
@@ -51,5 +51,5 @@ check: $(RESULTS_DIR) $(RESULTS) all
 	fi; \
 
 clean:
-	rm -rf $(BUILD_DIR)/*
-	rm -rf $(RESULTS_DIR)
+	$(RM) $(BUILD_DIR)/*
+	$(RM) -rf $(RESULTS_DIR)
